@@ -14,21 +14,23 @@ namespace StructuralFieldsPlusTesting {
         int x_size;
         int z_size;
 
-        int[,] embrasureArray;
-        int[,] roofArray;
+        //int[,] embrasureArray;
+        //int[,] roofArray;
         int[,] conduitArray;
 
         Dictionary<int, FieldNet> fieldNets;
         List<int> usedIndices;// = new List<int>();
-        
+
+        public int[,] ConduitArray { get => conduitArray; set => conduitArray = value; }
+
         public FieldMap(Map map) : base(map) {
 
             x_size = map.Size.x;
             z_size = map.Size.z;
             //init value = 0
-            embrasureArray = new int[x_size, z_size];
-            roofArray = new int[x_size, z_size];
-            conduitArray = new int[x_size, z_size];
+            //embrasureArray = new int[x_size, z_size];
+            //roofArray = new int[x_size, z_size];
+            ConduitArray = new int[x_size, z_size];
 
             fieldNets = new Dictionary<int, FieldNet>();
 
@@ -67,19 +69,19 @@ namespace StructuralFieldsPlusTesting {
         }
 
         //check immadiate adjacent to [x, z]
-        public List<IntVec2> checkAdjacentCells(int x, int z, int netIDFind) {
+        public List<IntVec2> checkAdjacentCellsMatch(int x, int z, int netIDFind) {
             List<IntVec2> cells = new List<IntVec2>();
 
-            if (x + 1 < x_size && conduitArray[x + 1, z] == netIDFind) {
+            if (x + 1 < x_size && ConduitArray[x + 1, z] == netIDFind) {
                 cells.Add(new IntVec2(x + 1, z));
             }
-            if (x - 1 >= 0 && conduitArray[x - 1, z] == netIDFind) {
+            if (x - 1 >= 0 && ConduitArray[x - 1, z] == netIDFind) {
                 cells.Add(new IntVec2(x - 1, z));
             }
-            if (z + 1 < z_size && conduitArray[x, z + 1] == netIDFind) {
+            if (z + 1 < z_size && ConduitArray[x, z + 1] == netIDFind) {
                 cells.Add(new IntVec2(x, z + 1));
             }
-            if (z - 1 >= 0 && conduitArray[x, z - 1] == netIDFind) {
+            if (z - 1 >= 0 && ConduitArray[x, z - 1] == netIDFind) {
                 cells.Add(new IntVec2(x, z - 1));
             }
 
@@ -89,16 +91,16 @@ namespace StructuralFieldsPlusTesting {
         public List<IntVec2> checkAdjacentCellsAvoid(int netIDAvoid, int x, int z) {
             List<IntVec2> cells = new List<IntVec2>();
 
-            if (x + 1 < x_size && conduitArray[x + 1, z] != netIDAvoid) {
+            if (x + 1 < x_size && ConduitArray[x + 1, z] != 0 && ConduitArray[x + 1, z] != netIDAvoid) {
                 cells.Add(new IntVec2(x + 1, z));
             }
-            if (x - 1 >= 0 && conduitArray[x - 1, z] != netIDAvoid) {
+            if (x - 1 >= 0 && ConduitArray[x - 1, z] != 0 && ConduitArray[x - 1, z] != netIDAvoid) {
                 cells.Add(new IntVec2(x - 1, z));
             }
-            if (z + 1 < z_size && conduitArray[x, z + 1] != netIDAvoid) {
+            if (z + 1 < z_size && ConduitArray[x, z + 1] != 0 && ConduitArray[x, z + 1] != netIDAvoid) {
                 cells.Add(new IntVec2(x, z + 1));
             }
-            if (z - 1 >= 0 && conduitArray[x, z - 1] != netIDAvoid) {
+            if (z - 1 >= 0 && ConduitArray[x, z - 1] != 0 && ConduitArray[x, z - 1] != netIDAvoid) {
                 cells.Add(new IntVec2(x, z - 1));
             }
 
@@ -118,7 +120,6 @@ namespace StructuralFieldsPlusTesting {
         //use for merge networks
         public int replaceNonZeroIndices(int old, int neo, int[,] searchArray) {
             int count = 0;
-
             for(int x = 0; x < x_size; x++) {
                 for(int z = 0; z < z_size; z++) {
                     if(searchArray[x, z] != 0 && searchArray[x, z] == old) {
@@ -127,12 +128,11 @@ namespace StructuralFieldsPlusTesting {
                     }
                 }
             }
-
             return count;
         }
 
         //use for split networks
-        /*public int replaceNonZeroIndices(int[,] old, int[,] neo) {
+        public int replaceNonZeroIndices(int[,] old, int[,] neo) {
             int count = 0;
             for (int x = 0; x < x_size; x++) {
                 for (int z = 0; z < z_size; z++) {
@@ -142,7 +142,6 @@ namespace StructuralFieldsPlusTesting {
                     }
                 }
             }
-
             return count;
         }
 
@@ -151,17 +150,16 @@ namespace StructuralFieldsPlusTesting {
             T hold = list[0];
             list.RemoveAt(0);
             return hold;
-        }*/
+        }
         
         //only to be used when immediateAdjacentCells.Count > 1
-        
-        /*public List<FieldNet> splitNet(int x, int z, short netID, List<IntVec2> immediateAdjacentCells) {
-            short[,] cloneArray = (short[,])conduitArray.Clone();
+        public List<FieldNet> splitNet(int x, int z, int netID, List<IntVec2> immediateAdjacentCells) {
+            int[,] cloneArray = (int[,])ConduitArray.Clone();
             List<FieldNet> newFieldNets = new List<FieldNet>();
             
             //List<IntVec2> immediateAdjacentCells = checkAdjacentCells(x, z, netID);
 
-            short tempID = searchNewIndex(0,0,0);
+            int tempID = searchNewIndex(0,0,0);
 
             //counts number of cells switched to new network
             //int ctr = 0;
@@ -169,139 +167,130 @@ namespace StructuralFieldsPlusTesting {
             CompFieldConduit conduit;
             FieldNet source = fieldNets[netID];
             List<CompFieldConduit> conduitsClone = new List<CompFieldConduit>();
-            List<CompFieldConduit> removeConduits = new List<CompFieldConduit>();*/
+            List<CompFieldConduit> removeConduits = new List<CompFieldConduit>();
             /*foreach(CompFieldConduit i in source.Conduits) {
                 conduitsClone.Add()
             }*/
-            /*conduitsClone.AddRange(source.Conduits);
-            short avoid1 = 0;
-            short avoid2 = 0;
-            short avoid3 = 0;
+            conduitsClone.AddRange(source.Conduits);
+            int avoid1 = 0;
+            int avoid2 = 0;
+            int avoid3 = 0;
 
             //vars for checking if disjoint networks
             List<IntVec2> bfsQueue = new List<IntVec2>();
             List<IntVec2> intermediate;
             IntVec2 operand;
             IntVec2 operand2;
-            
-            if (immediateAdjacentCells.Count == 2) {
-                operand = immediateAdjacentCells[0];
+
+            int net = 0;
+            Messages.Message("Net", MessageSound.Standard);
+            while (immediateAdjacentCells.Count > 0) {
+                operand = deque(immediateAdjacentCells);
                 cloneArray[operand.x, operand.z] = tempID;
-                intermediate = checkAdjacentCellsAvoid(tempID, operand.x, operand.z);
+                intermediate = checkAdjacentCellsMatch(operand.x, operand.z, netID);
                 foreach (IntVec2 i in intermediate) {
                     cloneArray[i.x, i.z] = tempID;
                 }
                 bfsQueue.AddRange(intermediate);
-                while(bfsQueue.Count > 0 && cloneArray[immediateAdjacentCells[1].x, immediateAdjacentCells[1].z] != tempID) {
+                while (bfsQueue.Count > 0 && immediateAdjacentCells.Count > 0) {
                     operand = deque(bfsQueue);
                     cloneArray[operand.x, operand.z] = tempID;
-                    intermediate = checkAdjacentCellsAvoid(tempID, operand.x, operand.z);
+                    intermediate = checkAdjacentCellsMatch(operand.x, operand.z, netID);
+                    Messages.Message("intermediate: " + intermediate.Count.ToString(), MessageSound.Standard);
                     foreach (IntVec2 i in intermediate) {
                         cloneArray[i.x, i.z] = tempID;
                     }
                     bfsQueue.AddRange(intermediate);
-                }
-                if(cloneArray[immediateAdjacentCells[1].x, immediateAdjacentCells[1].z] == tempID) {
-                    return newFieldNets;
-                } else {
-                    //adjust conduitArray
-                    replaceNonZeroIndices(conduitArray, cloneArray);
-                    //initilize and add FieldNet
-                    initializing = new FieldNet(tempID, new List<CompFieldConduit>());
-                    newFieldNets.Add(initializing);
-                    //source = fieldNets[netID];
-                    for(int i = 0; i < conduitsClone.Count; i++) {
-                        conduit = conduitsClone[i];
-                        if(cloneArray[conduit.parent.Position.x, conduit.parent.Position.z] == tempID) {
-                            removeConduits.Add(conduit);
-                            source.deregister(conduit);
-                            initializing.register(conduit);
+                    for (int i = 0; i < immediateAdjacentCells.Count; i++) {
+                        operand2 = immediateAdjacentCells[i];
+                        if (cloneArray[operand2.x, operand2.z] == tempID) {
+                            //immediateAdjacentCells.Remove(operand2);
+                            intermediate.Add(operand2);
+                            //break;
                         }
                     }
-                    foreach (CompFieldConduit i in removeConduits) {
-                        conduitsClone.Remove(i);
-                    }
-                    return newFieldNets;
-                }
-            } else {
-                int net = 0;
-                while(immediateAdjacentCells.Count > 0) {
-                    operand = deque(immediateAdjacentCells);
-                    cloneArray[operand.x, operand.z] = tempID;
-                    intermediate = checkAdjacentCellsAvoid(tempID, operand.x, operand.z);
                     foreach (IntVec2 i in intermediate) {
-                        cloneArray[i.x, i.z] = tempID;
+                        immediateAdjacentCells.Remove(i);
                     }
-                    bfsQueue.AddRange(intermediate);
-                    while (bfsQueue.Count > 0 && immediateAdjacentCells.Count > 0) {
-                        operand = deque(bfsQueue);
-                        cloneArray[operand.x, operand.z] = tempID;
-                        intermediate = checkAdjacentCellsAvoid(tempID, operand.x, operand.z);
-                        foreach (IntVec2 i in intermediate) {
-                            cloneArray[i.x, i.z] = tempID;
-                        }
-                        bfsQueue.AddRange(intermediate);
-                        for (int i = 0; i < immediateAdjacentCells.Count; i++) {
-                            operand2 = immediateAdjacentCells[i];
-                            if (cloneArray[operand2.x, operand2.z] == tempID) {
-                                immediateAdjacentCells.Remove(operand2);
-                                break;
-                            }
-                        }
 
-                    }
-                    if (net == 0 && immediateAdjacentCells.Count == 0) {
-                        return newFieldNets;
-                    }
-                    initializing = new FieldNet(tempID, new List<CompFieldConduit>());
-                    newFieldNets.Add(initializing);
-                    //source = fieldNets[netID];
-                    for (int i = 0; i < conduitsClone.Count; i++) {
-                        conduit = conduitsClone[i];
-                        if (cloneArray[conduit.parent.Position.x, conduit.parent.Position.z] == tempID) {
-                            removeConduits.Add(conduit);
-                            source.deregister(conduit);
-                            initializing.register(conduit);
-                        }
-                    }
-                    foreach (CompFieldConduit i in removeConduits) {
-                        conduitsClone.Remove(i);
-                    }
-                    net++;
-                    if(net == 1) {
-                        avoid1 = tempID;
-                    } else if(net == 2){
-                        avoid2 = tempID;
-                    } else if (net == 3) {
-                        avoid3 = tempID;
-                    }
-                    tempID = searchNewIndex(avoid1, avoid2, avoid3);
                 }
-                replaceNonZeroIndices(conduitArray, cloneArray);
-                return newFieldNets;
+                //check if network is intact
+                if (net == 0 && immediateAdjacentCells.Count == 0) {
+                    Messages.Message("no split", MessageSound.Standard);
+                    return newFieldNets;
+                }
+                //initialize new network
+                initializing = new FieldNet(tempID, new List<CompFieldConduit>());
+                newFieldNets.Add(initializing);
+                //source = fieldNets[netID];
+                //transfer conduits to new network
+                for (int i = 0; i < conduitsClone.Count; i++) {
+                    conduit = conduitsClone[i];
+                    if (cloneArray[conduit.parent.Position.x, conduit.parent.Position.z] == tempID) {
+                        removeConduits.Add(conduit);
+                        source.deregister(conduit);
+                        initializing.register(conduit);
+                    }
+                }
+                foreach (CompFieldConduit i in removeConduits) {
+                    conduitsClone.Remove(i);
+                }
+                net++;
+                Messages.Message("Net" + net.ToString(), MessageSound.Standard);
+                //set new FieldNet's ID to be avoided in search for new tempID
+                if (net == 1) {
+                    avoid1 = tempID;
+                } else if (net == 2) {
+                    avoid2 = tempID;
+                } else if (net == 3) {
+                    avoid3 = tempID;
+                } else if (net == 4) {
+                    fieldNets.Remove(netID);
+                    usedIndices.Remove(netID);
+                }
+                tempID = searchNewIndex(avoid1, avoid2, avoid3);
             }
-        }*/
+            replaceNonZeroIndices(ConduitArray, cloneArray);
+            return newFieldNets;
+        }
 
         //handles removal of empty FieldNets
-        /*public void deregister(CompFieldConduit conduit) {
+        public void deregister(CompFieldConduit conduit) {
             int x = conduit.parent.Position.x;
             int z = conduit.parent.Position.z;
 
-            short index = conduitArray[x, z];
+            int index = ConduitArray[x, z];
 
-            List<IntVec2> adjacentCells = checkAdjacentCells(x, z, index);
+            List<IntVec2> adjacentCells = checkAdjacentCellsMatch(x, z, index);
 
-            conduitArray[x, z] = 0;
+            //handles case one adjacent conduit, needed for all cases
+            ConduitArray[x, z] = 0;
             fieldNets[index].deregister(conduit);
 
-            //case single element of FieldNet, remove
+            //case single element of FieldNet, remove FieldNet
             if (adjacentCells.Count == 0) {
                 usedIndices.Remove(index);
                 fieldNets.Remove(index);
+            //case more than one adjacent conduit
             } else if (adjacentCells.Count > 1) {
+                /*Messages.Message("AdjacentCells: " + adjacentCells.Count.ToString(), MessageSound.Standard);
+                List<FieldNet> temp = splitNet(x, z, index, adjacentCells);
+                Messages.Message("Count: " + temp.Count.ToString(), MessageSound.Standard);
+                foreach (FieldNet i in temp) {
+                    fieldNets.Add(i.NetID,i);
+                    usedIndices.Add(i.NetID);
+                }*/
 
+                //rebuilt net instead
+                List<CompFieldConduit> conduits = fieldNets[index].Conduits;
+                usedIndices.Remove(index);
+                fieldNets.Remove(index);
+                conduits.Remove(conduit);
+                foreach (CompFieldConduit i in conduits) {
+                    register(i);
+                }
             }
-        }*/
+        }
 
         public string toString(List<int> list) {
             string temp = "";
@@ -319,19 +308,18 @@ namespace StructuralFieldsPlusTesting {
             int x = conduit.parent.Position.x;
             int z = conduit.parent.Position.z;
 
-            List<int> adjacentNets = checkAdjacentNets(x, z, conduitArray);
-            Messages.Message(toString(adjacentNets), MessageSound.Standard);
+            List<int> adjacentNets = checkAdjacentNets(x, z, ConduitArray);
             int index = searchNewIndex(0,0,0);
 
             if (fieldNets.Count == 0 || adjacentNets.NullOrEmpty()) {
-                conduitArray[x, z] = index;
+                //ConduitArray[x, z] = index;
                 usedIndices.Add(index);
                 fieldNets.Add(index, new FieldNet(index, new List<CompFieldConduit>()));
                 fieldNets[index].register(conduit);
                 return;
             } else if (adjacentNets.Count == 1) {
-                conduitArray[x, z] = index;
                 index = adjacentNets.First();
+                //ConduitArray[x, z] = index;
                 fieldNets[index].register(conduit);
             } else {
                 FieldNet hold = fieldNets[adjacentNets[0]];
@@ -341,13 +329,12 @@ namespace StructuralFieldsPlusTesting {
 
                     temp = fieldNets[index];
                     fieldNets.Remove(index);
-
                     usedIndices.Remove(index);
 
-                    replaceNonZeroIndices(index, adjacentNets[0], conduitArray);
+                    //replaceNonZeroIndices(index, adjacentNets[0], ConduitArray);
                     hold.register(temp.Conduits);
                 }
-                conduitArray[x, z] = adjacentNets[0];
+                //ConduitArray[x, z] = adjacentNets[0];
                 hold.register(conduit);
             }
 
@@ -359,8 +346,8 @@ namespace StructuralFieldsPlusTesting {
             usedIndices.Add(index);
         }*/
 
-        public void deregister(CompFieldConduit conduit) {
+        /*public void deregister(CompFieldConduit conduit) {
             usedIndices.Remove(conduit.networkID);
-        }
+        }*/
     }
 }

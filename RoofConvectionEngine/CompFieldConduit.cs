@@ -8,7 +8,12 @@ using Verse;
 
 namespace StructuralFieldsPlusTesting {
     public class CompFieldConduit : ThingComp {
-        public int networkID;
+        //private int networkID;
+
+        public int NetworkID {
+            get => parent.Map.GetComponent<FieldMap>().ConduitArray[parent.Position.x, parent.Position.z];
+            set => parent.Map.GetComponent<FieldMap>().ConduitArray[parent.Position.x, parent.Position.z] = value;
+        }
 
         /*
         public CompFieldConduit() {
@@ -16,11 +21,11 @@ namespace StructuralFieldsPlusTesting {
         }
         */
 
-        public override void PostExposeData() {
+        /*public override void PostExposeData() {
             base.PostExposeData();
 
             Scribe_Values.Look<int>(ref this.networkID, "networkID", -1, false);
-        }
+        }*/
 
         public override void PostSpawnSetup(bool respawningAfterLoad) {
             base.PostSpawnSetup(respawningAfterLoad);
@@ -31,6 +36,7 @@ namespace StructuralFieldsPlusTesting {
 
         public override void PostDeSpawn(Map map) {
             base.PostDeSpawn(map);
+            Messages.Message("DeSpawn Triggered", MessageSound.Standard);
             map.GetComponent<FieldMap>().deregister(this);
         }
 

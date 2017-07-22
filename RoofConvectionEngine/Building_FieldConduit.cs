@@ -32,7 +32,7 @@ namespace StructuralFieldsPlusTesting {
 
         public override string GetInspectString() {
             
-            return "NetID: " + compFieldConduit.networkID.ToString();
+            return "NetID: " + compFieldConduit.NetworkID.ToString();
         }
         #endregion
 
