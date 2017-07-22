@@ -283,9 +283,12 @@ namespace StructuralFieldsPlusTesting {
 
                 //rebuilt net instead
                 List<CompFieldConduit> conduits = fieldNets[index].Conduits;
+                conduits.Remove(conduit);
+                foreach (CompFieldConduit i in conduits) {
+                    i.NetworkID = 0;
+                }
                 usedIndices.Remove(index);
                 fieldNets.Remove(index);
-                conduits.Remove(conduit);
                 foreach (CompFieldConduit i in conduits) {
                     register(i);
                 }

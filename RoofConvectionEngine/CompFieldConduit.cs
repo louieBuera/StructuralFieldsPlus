@@ -9,10 +9,12 @@ using Verse;
 namespace StructuralFieldsPlusTesting {
     public class CompFieldConduit : ThingComp {
         //private int networkID;
+        private IntVec3 position;
+        private FieldMap fieldMap;
 
         public int NetworkID {
-            get => parent.Map.GetComponent<FieldMap>().ConduitArray[parent.Position.x, parent.Position.z];
-            set => parent.Map.GetComponent<FieldMap>().ConduitArray[parent.Position.x, parent.Position.z] = value;
+            get => fieldMap.ConduitArray[position.x, position.z];
+            set => fieldMap.ConduitArray[position.x, position.z] = value;
         }
 
         /*
@@ -29,9 +31,11 @@ namespace StructuralFieldsPlusTesting {
 
         public override void PostSpawnSetup(bool respawningAfterLoad) {
             base.PostSpawnSetup(respawningAfterLoad);
-            if (!respawningAfterLoad) {
-                parent.Map.GetComponent<FieldMap>().register(this);
-            }
+            position = parent.Position;
+            fieldMap = parent.Map.GetComponent<FieldMap>();
+            //if (!respawningAfterLoad) {
+            fieldMap.register(this);
+            //}
         }
 
         public override void PostDeSpawn(Map map) {
