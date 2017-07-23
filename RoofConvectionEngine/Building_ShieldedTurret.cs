@@ -14,10 +14,11 @@ namespace StructuralFieldsPlusTesting{
 
         public CompFieldConduit compFieldConduit = new CompFieldConduit();
         public CompFieldCapacitor compFieldCapacitor = new CompFieldCapacitor();
+        public CompFieldGenerator compFieldGenerator = new CompFieldGenerator();
 
         public int NetworkID { get => compFieldConduit.NetworkID;  }
         public FieldNet ConnectedFieldNet { get => base.Map.GetComponent<FieldMap>().fieldNets[NetworkID]; }
-        public float AvailableField { get => ConnectedFieldNet.CurrentField - ConnectedFieldNet.DeferDamage; }
+        //public float AvailableField { get => ConnectedFieldNet.CurrentField - ConnectedFieldNet.DeferDamage; }
 
         
 
@@ -28,14 +29,6 @@ namespace StructuralFieldsPlusTesting{
             }
             ConnectedFieldNet.preApplyDamage(dInfo, out absorbed);
             return;
-            /*if(dInfo.Amount < AvailableField) {
-                currentShields -= dInfo.Amount;
-                absorbed = true;
-            } else {
-                dInfo.SetAmount(dInfo.Amount - (int)Math.Floor(currentShields));
-                currentShields -= (float)Math.Floor(currentShields);
-                absorbed = false;
-            }*/
         }
 
         
@@ -44,13 +37,14 @@ namespace StructuralFieldsPlusTesting{
             base.ExposeData();
             this.compFieldConduit = base.GetComp<CompFieldConduit>();
             this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
+            this.compFieldGenerator = base.GetComp<CompFieldGenerator>();
         }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad) {
             base.SpawnSetup(map, respawningAfterLoad);
             this.compFieldConduit = base.GetComp<CompFieldConduit>();
             this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
-
+            this.compFieldGenerator = base.GetComp<CompFieldGenerator>();
         }
 
         public override string GetInspectString() {
@@ -63,7 +57,7 @@ namespace StructuralFieldsPlusTesting{
                 stringBuilder.AppendLine();
             }
             stringBuilder.Append("Field: ");
-            stringBuilder.Append(string.Format("{0:N8}", AvailableField));
+            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.AvailableField));
             // return the complete string
             return stringBuilder.ToString().TrimEndNewlines();
         }

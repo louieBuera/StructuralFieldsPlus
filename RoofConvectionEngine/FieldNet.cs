@@ -9,32 +9,44 @@ using RimWorld;
 namespace StructuralFieldsPlusTesting {
     class FieldNet {
         int netID;
+        //deferred variables should not be used for currentField/unusedStorage computations
         float deferDamage = 0;
-        float genPerTick = 5;
+        float deferGenerate = 0;
+        float genPerTick = 0;
         float currentField = 0;
         float maxField = 0;
         int ctr = 0;
 
         private List<CompFieldConduit> conduits;
         private List<CompFieldCapacitor> capacitors = new List<CompFieldCapacitor>();
-        public float UnusedStorage { get => maxField - currentField; }
 
+        #region getters+setters
+        public float UnusedStorage { get => maxField - currentField; }
+        public float AvailableField { get => currentField + deferGenerate - deferDamage;  }
+        public List<CompFieldConduit> Conduits { get => conduits; set => conduits = value; }
+        public int NetID { get => netID; set => netID = value; }
+        internal List<CompFieldCapacitor> Capacitors { get => capacitors; set => capacitors = value; }
+        //public float CurrentField { get => currentField; set => currentField = value; }
+        //public float DeferDamage { get => deferDamage; set => deferDamage = value; }
+        //public float DeferGenerate { get => deferGenerate; set => deferGenerate = value; }
+
+        public float unusedStoragePercentage(CompFieldCapacitor capacitor) {
+            return capacitor.UnusedStorage / this.UnusedStorage;
+        }
+
+        public float filledStoragePercentage(CompFieldCapacitor capacitor) {
+            return capacitor.CurrentField / this.currentField;
+        }
+
+        #endregion
+
+        //constructor
         public FieldNet(int ID, List<CompFieldConduit> conduits) {
             netID = ID;
             this.conduits = conduits;
         }
 
-        public List<CompFieldConduit> Conduits { get => conduits; set => conduits = value; }
-        public int NetID { get => netID; set => netID = value; }
-        internal List<CompFieldCapacitor> Capacitors { get => capacitors; set => capacitors = value; }
-        public float CurrentField { get => currentField; set => currentField = value; }
-        public float DeferDamage { get => deferDamage; set => deferDamage = value; }
-
-        public void deregister(CompFieldConduit conduit) {
-            conduit.NetworkID = 0;
-            this.conduits.Remove(conduit);
-        }
-
+        #region register/deregister
         public void register(CompFieldConduit conduit) {
             conduit.NetworkID = netID;
             this.conduits.Add(conduit);
@@ -47,16 +59,9 @@ namespace StructuralFieldsPlusTesting {
             this.conduits.AddRange(conduits);
         }
 
-        public void preApplyDamage(DamageInfo dInfo, out bool absorbed) {
-            if (dInfo.Amount < currentField - deferDamage) {
-                deferDamage += dInfo.Amount;
-                absorbed = true;
-            } else {
-                int delta = (int)Math.Floor(currentField - deferDamage);
-                dInfo.SetAmount(dInfo.Amount - delta);
-                deferDamage += delta;
-                absorbed = false;
-            }
+        public void deregister(CompFieldConduit conduit) {
+            conduit.NetworkID = 0;
+            this.conduits.Remove(conduit);
         }
 
         public void register(CompFieldCapacitor capacitor) {
@@ -66,10 +71,7 @@ namespace StructuralFieldsPlusTesting {
         }
 
         public void register(List<CompFieldCapacitor> capacitors) {
-            /*for (int i = 0; i < capacitors.Count; i++) {
-                conduits[i].NetworkID = netID;
-            }*/
-            foreach(CompFieldCapacitor capacitor in capacitors) {
+            foreach (CompFieldCapacitor capacitor in capacitors) {
                 this.currentField += capacitor.CurrentField;
                 this.maxField += capacitor.StoredFieldMax;
             }
@@ -83,48 +85,70 @@ namespace StructuralFieldsPlusTesting {
             this.capacitors.Remove(capacitor);
         }
 
-        public void tick() {
-            ctr++;
-            //do tickRare every 30 ticks == 0.5 seconds
-            if(ctr == 30) {
-                tickRare();
+        public void register(CompFieldGenerator generator) {
+            this.genPerTick += generator.GenPerTick;
+        }
+
+        public void register(List<CompFieldGenerator> generators) {
+            foreach (CompFieldGenerator i in generators) {
+                this.genPerTick += i.GenPerTick;
             }
         }
 
-        public void tickRare() {
-            flushDamageGeneration();
+        public void deregister(CompFieldGenerator generator) {
+            this.genPerTick -= generator.GenPerTick;
         }
 
-        public float unusedStoragePercentage(CompFieldCapacitor capacitor) {
-            return capacitor.UnusedStorage / this.UnusedStorage;
+        #endregion
+        public void preApplyDamage(DamageInfo dInfo, out bool absorbed) {
+            if (dInfo.Amount < currentField + deferGenerate - deferDamage) {
+                deferDamage += dInfo.Amount;
+                absorbed = true;
+            } else {
+                int delta = (int)Math.Floor(currentField + deferGenerate - deferDamage);
+                dInfo.SetAmount(dInfo.Amount - delta);
+                deferDamage += delta;
+                absorbed = false;
+            }
         }
 
-        public float filledStoragePercentage(CompFieldCapacitor capacitor) {
-            return capacitor.CurrentField / this.currentField;
+        
+
+        public void tick() {
+            ctr++;
+            deferGenerate += genPerTick;
+            //do tickRare every 30 ticks == 0.5 seconds
+            if(ctr == 30) {
+                flushDamageGeneration();
+            }
         }
+
+
 
         public void flushDamageGeneration() {
             //generated since last
-            float temp = (float)ctr * genPerTick;
+            //float temp = (float)ctr * genPerTick;
             //total change in field strength
-            temp -= deferDamage;
+            float delta = deferGenerate - deferDamage;
             //distribute charge/discharge => attemp to balance fill percentage
-            if(temp + CurrentField >= maxField) {
+            if(delta + currentField >= maxField) {
                 foreach (CompFieldCapacitor i in capacitors) {
                     i.CurrentField = i.StoredFieldMax;
                 }
                 this.currentField = this.maxField;
-            } else if (temp > 0) {
+            } else if (delta > 0) {
                 foreach(CompFieldCapacitor i in capacitors) {
-                    i.CurrentField += unusedStoragePercentage(i) * temp;
+                    i.CurrentField += unusedStoragePercentage(i) * delta;
                 }
-                this.currentField += temp;
-            } else if (temp < 0) {
+                this.currentField += delta;
+            } else if (delta < 0) {
                 foreach (CompFieldCapacitor i in capacitors) {
-                    i.CurrentField += filledStoragePercentage(i) * temp;
+                    i.CurrentField += filledStoragePercentage(i) * delta;
                 }
-                this.currentField += temp;
+                this.currentField += delta;
             }
+            deferDamage = 0;
+            deferGenerate = 0f;
             ctr = 0;
         }
 

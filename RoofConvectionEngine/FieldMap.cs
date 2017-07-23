@@ -94,7 +94,7 @@ namespace StructuralFieldsPlusTesting {
             return cells;
         }
 
-        public List<IntVec2> checkAdjacentCellsAvoid(int netIDAvoid, int x, int z) {
+        /*public List<IntVec2> checkAdjacentCellsAvoid(int netIDAvoid, int x, int z) {
             List<IntVec2> cells = new List<IntVec2>();
 
             if (x + 1 < x_size && ConduitArray[x + 1, z] != 0 && ConduitArray[x + 1, z] != netIDAvoid) {
@@ -111,7 +111,7 @@ namespace StructuralFieldsPlusTesting {
             }
 
             return cells;
-        }
+        }*/
 
         //set avoid to 0 to use as 
         public int searchNewIndex(int avoid1, int avoid2, int avoid3 ) {
@@ -124,7 +124,7 @@ namespace StructuralFieldsPlusTesting {
         }
 
         //use for merge networks
-        public int replaceNonZeroIndices(int old, int neo, int[,] searchArray) {
+        /*public int replaceNonZeroIndices(int old, int neo, int[,] searchArray) {
             int count = 0;
             for(int x = 0; x < x_size; x++) {
                 for(int z = 0; z < z_size; z++) {
@@ -135,10 +135,10 @@ namespace StructuralFieldsPlusTesting {
                 }
             }
             return count;
-        }
+        }*/
 
         //use for split networks
-        public int replaceNonZeroIndices(int[,] old, int[,] neo) {
+        /*public int replaceNonZeroIndices(int[,] old, int[,] neo) {
             int count = 0;
             for (int x = 0; x < x_size; x++) {
                 for (int z = 0; z < z_size; z++) {
@@ -149,7 +149,7 @@ namespace StructuralFieldsPlusTesting {
                 }
             }
             return count;
-        }
+        }*/
 
         //convenience function
         public T deque<T>(List<T> list) {
@@ -159,7 +159,7 @@ namespace StructuralFieldsPlusTesting {
         }
         
         //only to be used when immediateAdjacentCells.Count > 1
-        public List<FieldNet> splitNet(int x, int z, int netID, List<IntVec2> immediateAdjacentCells) {
+        /*public List<FieldNet> splitNet(int x, int z, int netID, List<IntVec2> immediateAdjacentCells) {
             int[,] cloneArray = (int[,])ConduitArray.Clone();
             List<FieldNet> newFieldNets = new List<FieldNet>();
             
@@ -173,11 +173,11 @@ namespace StructuralFieldsPlusTesting {
             CompFieldConduit conduit;
             FieldNet source = fieldNets[netID];
             List<CompFieldConduit> conduitsClone = new List<CompFieldConduit>();
-            List<CompFieldConduit> removeConduits = new List<CompFieldConduit>();
+            List<CompFieldConduit> removeConduits = new List<CompFieldConduit>();*/
             /*foreach(CompFieldConduit i in source.Conduits) {
                 conduitsClone.Add()
             }*/
-            conduitsClone.AddRange(source.Conduits);
+            /*conduitsClone.AddRange(source.Conduits);
             int avoid1 = 0;
             int avoid2 = 0;
             int avoid3 = 0;
@@ -258,7 +258,7 @@ namespace StructuralFieldsPlusTesting {
             }
             replaceNonZeroIndices(ConduitArray, cloneArray);
             return newFieldNets;
-        }
+        }*/
 
         //handles removal of empty FieldNets
         public void deregister(CompFieldConduit conduit) {
@@ -300,7 +300,7 @@ namespace StructuralFieldsPlusTesting {
             }
         }
 
-        public string toString(List<int> list) {
+        /*public string toString(List<int> list) {
             string temp = "";
 
             foreach(int i in list){
@@ -308,7 +308,7 @@ namespace StructuralFieldsPlusTesting {
             }
 
             return temp;
-        }
+        }*/
 
         //handles registering conduits to FieldNets
         //handles creation of new FieldNets
@@ -350,15 +350,26 @@ namespace StructuralFieldsPlusTesting {
         }
 
         public void register(CompFieldCapacitor capacitor) {
-            capacitor.NetworkID = conduitArray[capacitor.Position.x, capacitor.Position.z];
-            FieldNet temp = fieldNets[capacitor.NetworkID];
-            temp.register(capacitor);
+            //removed due to replacement of var with getter
+            //capacitor.NetworkID = conduitArray[capacitor.Position.x, capacitor.Position.z];
+            fieldNets[capacitor.NetworkID].register(capacitor);
         }
 
         public void deregister(CompFieldCapacitor capacitor) {
             try {
-                FieldNet temp = fieldNets[capacitor.NetworkID];
-                temp.deregister(capacitor);
+                fieldNets[capacitor.NetworkID].deregister(capacitor);
+            } catch (KeyNotFoundException e) {
+                Messages.Message("FieldNet destroyed", MessageSound.Standard);
+            }
+        }
+
+        public void register(CompFieldGenerator generator) {
+            fieldNets[generator.NetworkID].register(generator);
+        }
+
+        public void deregister(CompFieldGenerator generator) {
+            try {
+                fieldNets[generator.NetworkID].deregister(generator);
             } catch (KeyNotFoundException e) {
                 Messages.Message("FieldNet destroyed", MessageSound.Standard);
             }
