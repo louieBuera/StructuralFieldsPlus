@@ -17,18 +17,6 @@ namespace StructuralFieldsPlusTesting {
             set => fieldMap.ConduitArray[position.x, position.z] = value;
         }
 
-        /*
-        public CompFieldConduit() {
-            this.networkID = (new Random()).Next();
-        }
-        */
-
-        /*public override void PostExposeData() {
-            base.PostExposeData();
-
-            Scribe_Values.Look<int>(ref this.networkID, "networkID", -1, false);
-        }*/
-
         public override void PostSpawnSetup(bool respawningAfterLoad) {
             base.PostSpawnSetup(respawningAfterLoad);
             position = parent.Position;
@@ -41,7 +29,7 @@ namespace StructuralFieldsPlusTesting {
         public override void PostDeSpawn(Map map) {
             base.PostDeSpawn(map);
             Messages.Message("DeSpawn Triggered", MessageSound.Standard);
-            map.GetComponent<FieldMap>().deregister(this);
+            fieldMap.deregister(this);
         }
 
 

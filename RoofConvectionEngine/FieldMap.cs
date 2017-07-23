@@ -37,6 +37,12 @@ namespace StructuralFieldsPlusTesting {
             usedIndices = new List<int>();
         }
 
+        public override void MapComponentTick() {
+            foreach(int i in usedIndices) {
+                fieldNets[i].tick();
+            }
+        }
+
         //checks positions 1 cell north, east, west, and south 
         public List<int> checkAdjacentNets(int x, int z, int[,] searchArray) {
             List<int> IDs = new List<int>();
@@ -273,16 +279,9 @@ namespace StructuralFieldsPlusTesting {
                 fieldNets.Remove(index);
             //case more than one adjacent conduit
             } else if (adjacentCells.Count > 1) {
-                /*Messages.Message("AdjacentCells: " + adjacentCells.Count.ToString(), MessageSound.Standard);
-                List<FieldNet> temp = splitNet(x, z, index, adjacentCells);
-                Messages.Message("Count: " + temp.Count.ToString(), MessageSound.Standard);
-                foreach (FieldNet i in temp) {
-                    fieldNets.Add(i.NetID,i);
-                    usedIndices.Add(i.NetID);
-                }*/
-
                 //rebuilt net instead
                 List<CompFieldConduit> conduits = fieldNets[index].Conduits;
+                List<CompFieldCapacitor> capacitors = fieldNets[index].Capacitors;
                 conduits.Remove(conduit);
                 foreach (CompFieldConduit i in conduits) {
                     i.NetworkID = 0;
@@ -290,6 +289,10 @@ namespace StructuralFieldsPlusTesting {
                 usedIndices.Remove(index);
                 fieldNets.Remove(index);
                 foreach (CompFieldConduit i in conduits) {
+                    register(i);
+                }
+                //relies on conduit of parent to be already in place
+                foreach (CompFieldCapacitor i in capacitors) {
                     register(i);
                 }
             }
@@ -336,6 +339,7 @@ namespace StructuralFieldsPlusTesting {
 
                     //replaceNonZeroIndices(index, adjacentNets[0], ConduitArray);
                     hold.register(temp.Conduits);
+                    hold.register(temp.Capacitors);
                 }
                 //ConduitArray[x, z] = adjacentNets[0];
                 hold.register(conduit);
@@ -343,14 +347,19 @@ namespace StructuralFieldsPlusTesting {
 
         }
 
-        /*public void register(CompFieldConduit conduit) {
-            int index = searchNewIndex(0, 0, 0);
-            conduit.networkID = index;
-            usedIndices.Add(index);
-        }*/
+        public void register(CompFieldCapacitor capacitor) {
+            capacitor.NetworkID = conduitArray[capacitor.Position.x, capacitor.Position.z];
+            FieldNet temp = fieldNets[capacitor.NetworkID];
+            temp.register(capacitor);
+        }
 
-        /*public void deregister(CompFieldConduit conduit) {
-            usedIndices.Remove(conduit.networkID);
-        }*/
+        public void deregister(CompFieldCapacitor capacitor) {
+            try {
+                FieldNet temp = fieldNets[capacitor.NetworkID];
+                temp.deregister(capacitor);
+            } catch (KeyNotFoundException e) {
+                Messages.Message("FieldNet destroyed", MessageSound.Standard);
+            }
+        }
     }
 }

@@ -51,9 +51,11 @@
     <Compile Include="Building_RoofConvectionEngine.cs" />
     <Compile Include="Building_ShieldedTurret.cs" />
     <Compile Include="Building_VerticalCooler.cs" />
+    <Compile Include="CompFieldCapacitor.cs" />
     <Compile Include="CompFieldConduit.cs" />
     <Compile Include="CompPowerPlant_RoofVent.cs" />
     <Compile Include="CompProperties_CompFieldConduit.cs" />
+    <Compile Include="CompProperties_FieldCapacitor.cs" />
     <Compile Include="CompProperties_RoofVent.cs" />
     <Compile Include="CompProperties_TempControl_RoofVent.cs" />
     <Compile Include="CompShieldTest.cs" />

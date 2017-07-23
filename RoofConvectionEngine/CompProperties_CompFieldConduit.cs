@@ -5,10 +5,10 @@ using System.Text;
 using Verse;
 
 namespace StructuralFieldsPlusTesting {
-    class CompProperties_CompFieldConduit : CompProperties{
+    class CompProperties_FieldConduit : CompProperties{
 
 
-        public CompProperties_CompFieldConduit() {
+        public CompProperties_FieldConduit() {
             this.compClass = typeof(CompFieldConduit);
         }
     }
