@@ -6,29 +6,52 @@ using System.Text;
 using RimWorld;
 using Verse;
 
-namespace RoofConvectionEngine{
+namespace StructuralFieldsPlusTesting{
     class Building_ShieldedTurret : Building_TurretGun {
-        private float currentShields = 0;
+        /*private float currentShields = 0;
         private float maxShields = 150;
-        private float regenPerSecond = 1.2f;
+        private float regenPerSecond = 1.2f;*/
+
+        public CompFieldConduit compFieldConduit = new CompFieldConduit();
+        public CompFieldCapacitor compFieldCapacitor = new CompFieldCapacitor();
+
+        public int NetworkID { get => compFieldConduit.NetworkID;  }
+        public FieldNet ConnectedFieldNet { get => base.Map.GetComponent<FieldMap>().fieldNets[NetworkID]; }
+        public float AvailableField { get => ConnectedFieldNet.CurrentField - ConnectedFieldNet.DeferDamage; }
+
+        
 
         public override void PreApplyDamage(DamageInfo dInfo, out bool absorbed) {
             base.PreApplyDamage(dInfo, out absorbed);
             if (absorbed) {
                 return;
             }
-
-            if(dInfo.Amount < currentShields) {
+            ConnectedFieldNet.preApplyDamage(dInfo, out absorbed);
+            return;
+            /*if(dInfo.Amount < AvailableField) {
                 currentShields -= dInfo.Amount;
                 absorbed = true;
             } else {
                 dInfo.SetAmount(dInfo.Amount - (int)Math.Floor(currentShields));
                 currentShields -= (float)Math.Floor(currentShields);
                 absorbed = false;
-            }
+            }*/
         }
+
         
 
+        public override void ExposeData() {
+            base.ExposeData();
+            this.compFieldConduit = base.GetComp<CompFieldConduit>();
+            this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
+        }
+
+        public override void SpawnSetup(Map map, bool respawningAfterLoad) {
+            base.SpawnSetup(map, respawningAfterLoad);
+            this.compFieldConduit = base.GetComp<CompFieldConduit>();
+            this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
+
+        }
 
         public override string GetInspectString() {
             StringBuilder stringBuilder = new StringBuilder();
@@ -39,18 +62,18 @@ namespace RoofConvectionEngine{
                 stringBuilder.Append(baseString);
                 stringBuilder.AppendLine();
             }
-            stringBuilder.Append("Shield: ");
-            stringBuilder.Append(string.Format("{0:N8}", currentShields));
+            stringBuilder.Append("Field: ");
+            stringBuilder.Append(string.Format("{0:N8}", AvailableField));
             // return the complete string
             return stringBuilder.ToString().TrimEndNewlines();
         }
 
         public override void Tick() {
             base.Tick();
-            currentShields += regenPerSecond / 60;
+            /*currentShields += regenPerSecond / 60;
             if(currentShields > maxShields) {
                 currentShields = maxShields;
-            }
+            }*/
         }
     }
 }

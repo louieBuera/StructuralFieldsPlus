@@ -18,7 +18,7 @@ namespace StructuralFieldsPlusTesting {
         //int[,] roofArray;
         int[,] conduitArray;
 
-        Dictionary<int, FieldNet> fieldNets;
+        public Dictionary<int, FieldNet> fieldNets;
         List<int> usedIndices;// = new List<int>();
 
         public int[,] ConduitArray { get => conduitArray; set => conduitArray = value; }
@@ -293,7 +293,9 @@ namespace StructuralFieldsPlusTesting {
                 }
                 //relies on conduit of parent to be already in place
                 foreach (CompFieldCapacitor i in capacitors) {
-                    register(i);
+                    if (!i.Position.Equals(conduit.position)) {
+                        register(i);
+                    }
                 }
             }
         }

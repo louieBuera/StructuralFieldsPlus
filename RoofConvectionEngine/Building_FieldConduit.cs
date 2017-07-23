@@ -24,6 +24,8 @@ namespace StructuralFieldsPlusTesting {
             
         }
         
+
+
         public override void ExposeData() {
             base.ExposeData();
             this.compFieldConduit = base.GetComp<CompFieldConduit>();

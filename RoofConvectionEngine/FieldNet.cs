@@ -10,7 +10,7 @@ namespace StructuralFieldsPlusTesting {
     class FieldNet {
         int netID;
         float deferDamage = 0;
-        float genPerTick = 200;
+        float genPerTick = 5;
         float currentField = 0;
         float maxField = 0;
         int ctr = 0;
@@ -27,6 +27,8 @@ namespace StructuralFieldsPlusTesting {
         public List<CompFieldConduit> Conduits { get => conduits; set => conduits = value; }
         public int NetID { get => netID; set => netID = value; }
         internal List<CompFieldCapacitor> Capacitors { get => capacitors; set => capacitors = value; }
+        public float CurrentField { get => currentField; set => currentField = value; }
+        public float DeferDamage { get => deferDamage; set => deferDamage = value; }
 
         public void deregister(CompFieldConduit conduit) {
             conduit.NetworkID = 0;
@@ -107,12 +109,12 @@ namespace StructuralFieldsPlusTesting {
             //total change in field strength
             temp -= deferDamage;
             //distribute charge/discharge => attemp to balance fill percentage
-            if(temp > maxField) {
+            if(temp + CurrentField >= maxField) {
                 foreach (CompFieldCapacitor i in capacitors) {
                     i.CurrentField = i.StoredFieldMax;
                 }
                 this.currentField = this.maxField;
-            } else if(temp > 0) {
+            } else if (temp > 0) {
                 foreach(CompFieldCapacitor i in capacitors) {
                     i.CurrentField += unusedStoragePercentage(i) * temp;
                 }

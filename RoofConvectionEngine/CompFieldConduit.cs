@@ -9,7 +9,7 @@ using Verse;
 namespace StructuralFieldsPlusTesting {
     public class CompFieldConduit : ThingComp {
         //private int networkID;
-        private IntVec3 position;
+        public IntVec3 position;
         private FieldMap fieldMap;
 
         public int NetworkID {
