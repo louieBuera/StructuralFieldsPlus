@@ -14,6 +14,8 @@ namespace StructuralFieldsPlusTesting{
         //private bool isGenerating = false;
         //private float origFunctionPower;
 
+        private int ticker = 0;
+
         public int NetworkID { get => base.Map.GetComponent<FieldMap>().ConduitArray[Position.x, Position.z]; }
         public FieldNet ConnectedFieldNet { get => base.Map.GetComponent<FieldMap>().fieldNets[NetworkID]; }
 
@@ -61,7 +63,12 @@ namespace StructuralFieldsPlusTesting{
 
         public override void Tick() {
             base.Tick();
-            if(!compFieldGenerator.IsGenerating && powerComp.PowerOn && ConnectedFieldNet.UnusedStorage >= 1) {
+            ticker++;
+            if (ticker == 60) {
+                compFieldGenerator.CompTickRareExtra();
+                ticker = 0;
+            }
+            /*if(!compFieldGenerator.IsGenerating && powerComp.PowerOn && ConnectedFieldNet.UnusedStorage >= 1) {
                 //IsGnerating has to be updated to update GenPerTick, before adjustingGeneratorOutput from connectedFieldNet
                 compFieldGenerator.IsGenerating = true;
                 ConnectedFieldNet.adjustGeneratorOutput(compFieldGenerator.GenPerTick);
@@ -73,7 +80,7 @@ namespace StructuralFieldsPlusTesting{
                 compFieldGenerator.IsGenerating = false;
                 base.powerComp.PowerOutput = -((CompProperties_Power)this.powerComp.props).basePowerConsumption -
                     ((CompProperties_FieldGenerator)this.compFieldGenerator.props).standbyWattage;
-            }
+            }*/
             /*currentShields += regenPerSecond / 60;
             if(currentShields > maxShields) {
                 currentShields = maxShields;
