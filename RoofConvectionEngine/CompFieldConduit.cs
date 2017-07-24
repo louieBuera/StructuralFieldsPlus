@@ -27,10 +27,24 @@ namespace StructuralFieldsPlusTesting {
             x = parent.Position.x;
             z = parent.Position.z;
             top = z + height / 2;
+            //if dimension is even, Position lakes lower-left cell from exact center
+            //just round down to compensate
             bottom = z - (height - 1) / 2;
             left = x - (width - 1) / 2;
             right = x + width / 2;
-            for(int i = left; i <= right; i++) {
+            if(top > fieldMap.z_size) {
+                top = fieldMap.z_size - 1;
+            }
+            if(bottom < 0) {
+                bottom = 0;
+            }
+            if (right > fieldMap.x_size) {
+                right = fieldMap.x_size - 1;
+            }
+            if(left < 0) {
+                left = 0;
+            }
+            for (int i = left; i <= right; i++) {
                 for(int j = bottom; j <= top; j++) {
                     if(i != x && j != z) {
                         fieldMap.ConduitArray[i, j] = NetworkID;

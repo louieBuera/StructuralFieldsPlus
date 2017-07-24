@@ -11,8 +11,8 @@ namespace StructuralFieldsPlusTesting {
         private const int startIndex = 1;
         private const int stopIndex = 16000;
 
-        int x_size;
-        int z_size;
+        public int x_size;
+        public int z_size;
 
         //int[,] embrasureArray;
         //int[,] roofArray;
@@ -43,7 +43,7 @@ namespace StructuralFieldsPlusTesting {
             }
         }
 
-        //checks positions 1 cell north, east, west, and south 
+        //checks all positions 1 cell north, east, west, and south for single cell
         public List<int> checkAdjacentNets(int x, int z, int[,] searchArray) {
             List<int> IDs = new List<int>();
             int ID;
@@ -74,9 +74,60 @@ namespace StructuralFieldsPlusTesting {
             return IDs;
         }
 
+        //checks all positions 1 cell north, east, west, and south for multi-cell
         public List<int> checkAdjacentNets(int x, int z, int[,] searchArray, int width, int height) {
             List<int> IDs = new List<int>();
-
+            int ID;
+            int top, bottom, left, right;
+            //still part of the building
+            top = z + height / 2;
+            bottom = z - (height - 1) / 2;
+            left = x - (width - 1) / 2;
+            right = x + width / 2;
+            //adjacent to the building
+            int above, below, toTheLeft, toTheRight;
+            above = z + height / 2 + 1;
+            below = z - (height - 1) / 2 - 1;
+            toTheLeft = x - (width - 1) / 2 - 1;
+            toTheRight = x + width / 2 + 1;
+            
+            //top edge
+            if(above < z_size) {
+                for(int i = left; i <= right; i++) {
+                    ID = searchArray[i, above];
+                    if (ID != 0 && !IDs.Contains(ID)) {
+                        IDs.Add(ID);
+                    }
+                }
+            }
+            //bottom edge
+            if(below >= 0) {
+                for (int i = left; i <= right; i++) {
+                    ID = searchArray[i, below];
+                    if (ID != 0 && !IDs.Contains(ID)) {
+                        IDs.Add(ID);
+                    }
+                }
+            }
+            //right edge
+            if(toTheRight < x_size) {
+                for(int i = bottom; i <= top; i++) {
+                    ID = searchArray[toTheRight, i];
+                    if (ID != 0 && !IDs.Contains(ID)) {
+                        IDs.Add(ID);
+                    }
+                }
+            }
+            //left edge
+            if (toTheLeft >= 0) {
+                for (int i = bottom; i <= top; i++) {
+                    ID = searchArray[toTheLeft, i];
+                    if (ID != 0 && !IDs.Contains(ID)) {
+                        IDs.Add(ID);
+                    }
+                }
+            }
+            return IDs;
         }
 
         //check immadiate adjacent to [x, z]
@@ -99,6 +150,56 @@ namespace StructuralFieldsPlusTesting {
             return cells;
         }
         
+        public List<IntVec2> checkAdjacentCellsMatch(int x, int z, int netIDFind, int width, int height) {
+            List<IntVec2> cells = new List<IntVec2>();
+            int top, bottom, left, right;
+            //still part of the building
+            top = z + height / 2;
+            bottom = z - (height - 1) / 2;
+            left = x - (width - 1) / 2;
+            right = x + width / 2;
+            //adjacent to the building
+            int above, below, toTheLeft, toTheRight;
+            above = z + height / 2 + 1;
+            below = z - (height - 1) / 2 - 1;
+            toTheLeft = x - (width - 1) / 2 - 1;
+            toTheRight = x + width / 2 + 1;
+
+            //top edge
+            if (above < z_size) {
+                for (int i = left; i <= right; i++) {
+                    if (conduitArray[i, above] == netIDFind) {
+                        cells.Add(new IntVec2(i, above));
+                    }
+                }
+            }
+            //bottom edge
+            if (below >= 0) {
+                for (int i = left; i <= right; i++) {
+                    if (conduitArray[i, below] == netIDFind) {
+                        cells.Add(new IntVec2(i, below));
+                    }
+                }
+            }
+            //right edge
+            if (toTheRight < x_size) {
+                for (int i = bottom; i <= top; i++) {
+                    if (conduitArray[toTheRight, i] == netIDFind) {
+                        cells.Add(new IntVec2(toTheRight, i));
+                    }
+                }
+            }
+            //left edge
+            if (toTheLeft >= 0) {
+                for (int i = bottom; i <= top; i++) {
+                    if (conduitArray[toTheLeft, i] == netIDFind) {
+                        cells.Add(new IntVec2(toTheLeft, i));
+                    }
+                }
+            }
+            return cells;
+        }
+
         //set avoid to 0 to use as default
         public int searchNewIndex(int avoid1, int avoid2, int avoid3 ) {
             for(int i= startIndex; i < stopIndex; i++) {
@@ -123,7 +224,13 @@ namespace StructuralFieldsPlusTesting {
 
             int index = ConduitArray[x, z];
 
-            List<IntVec2> adjacentCells = checkAdjacentCellsMatch(x, z, index);
+            List<IntVec2> adjacentCells;
+
+            if (conduit.parent.RotatedSize.Equals(new IntVec2(1, 1))) {
+                adjacentCells = checkAdjacentCellsMatch(x, z, index);
+            } else {
+                adjacentCells = checkAdjacentCellsMatch(x, z, index, conduit.parent.RotatedSize.x, conduit.parent.RotatedSize.z);
+            }
 
             //handles case one adjacent conduit, needed for all cases
             fieldNets[index].deregister(conduit);
@@ -167,7 +274,12 @@ namespace StructuralFieldsPlusTesting {
             int x = conduit.parent.Position.x;
             int z = conduit.parent.Position.z;
 
-            List<int> adjacentNets = checkAdjacentNets(x, z, ConduitArray);
+            List<int> adjacentNets;
+            if (conduit.parent.RotatedSize.Equals(new IntVec2(1, 1))) {
+                adjacentNets = checkAdjacentNets(x, z, ConduitArray);
+            } else {
+                adjacentNets = checkAdjacentNets(x, z, ConduitArray, conduit.parent.RotatedSize.x, conduit.parent.RotatedSize.z);
+            }
             int index = searchNewIndex(0,0,0);
 
             if (fieldNets.Count == 0 || adjacentNets.NullOrEmpty()) {
