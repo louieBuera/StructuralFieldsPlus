@@ -51,7 +51,7 @@ namespace StructuralFieldsPlusTesting {
             fieldMap.deregister(this);
         }
 
-        public override void CompTickRareExtra() {
+        public void CompTickRareExtra() {
             FieldNet ConnectedFieldNet = fieldMap.fieldNets[NetworkID];
             if (!isGenerating && powerComp.PowerOn && ConnectedFieldNet.UnusedStorage >= 1) {
                 //IsGnerating has to be updated to update GenPerTick, before adjustingGeneratorOutput from connectedFieldNet

@@ -53,10 +53,8 @@ namespace StructuralFieldsPlusTesting{
                 stringBuilder.Append(baseString);
                 stringBuilder.AppendLine();
             }
-            stringBuilder.Append("GenPerTick: ");
-            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.GenPerTick));
-            stringBuilder.Append("\nLocal: ");
-            stringBuilder.Append(string.Format("{0:N8}", compFieldCapacitor.CurrentField));
+            stringBuilder.Append("Available Field: ");
+            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.AvailableField));
             // return the complete string
             return stringBuilder.ToString().TrimEndNewlines();
         }
