@@ -74,6 +74,11 @@ namespace StructuralFieldsPlusTesting {
             return IDs;
         }
 
+        public List<int> checkAdjacentNets(int x, int z, int[,] searchArray, int width, int height) {
+            List<int> IDs = new List<int>();
+
+        }
+
         //check immadiate adjacent to [x, z]
         public List<IntVec2> checkAdjacentCellsMatch(int x, int z, int netIDFind) {
             List<IntVec2> cells = new List<IntVec2>();

@@ -46,7 +46,6 @@ namespace StructuralFieldsPlusTesting{
 
         public override string GetInspectString() {
             StringBuilder stringBuilder = new StringBuilder();
-
             // Add the inspections string from the base
             string baseString = base.GetInspectString();
             if (!baseString.NullOrEmpty()) {

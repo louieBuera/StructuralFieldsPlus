@@ -53,6 +53,7 @@ namespace StructuralFieldsPlusTesting {
         #region register/deregister
         public void register(CompFieldConduit conduit) {
             conduit.NetworkID = netID;
+            conduit.spreadNetworkID();
             this.conduits.Add(conduit);
         }
 
@@ -109,6 +110,7 @@ namespace StructuralFieldsPlusTesting {
         }
 
         #endregion
+
         public void preApplyDamage(DamageInfo dInfo, out bool absorbed) {
             if (dInfo.Amount < currentField + deferGenerate - deferDamage) {
                 deferDamage += dInfo.Amount;
