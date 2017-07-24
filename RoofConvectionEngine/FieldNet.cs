@@ -19,6 +19,7 @@ namespace StructuralFieldsPlusTesting {
 
         private List<CompFieldConduit> conduits;
         private List<CompFieldCapacitor> capacitors = new List<CompFieldCapacitor>();
+        private List<CompFieldGenerator> generators = new List<CompFieldGenerator>();
 
         #region getters+setters
         public float UnusedStorage { get => maxField - currentField; }
@@ -26,6 +27,9 @@ namespace StructuralFieldsPlusTesting {
         public List<CompFieldConduit> Conduits { get => conduits; set => conduits = value; }
         public int NetID { get => netID; set => netID = value; }
         internal List<CompFieldCapacitor> Capacitors { get => capacitors; set => capacitors = value; }
+        internal List<CompFieldGenerator> Generators { get => generators; set => generators = value; }
+        public float GenPerTick { get => genPerTick; set => genPerTick = value; }
+
         //public float CurrentField { get => currentField; set => currentField = value; }
         //public float DeferDamage { get => deferDamage; set => deferDamage = value; }
         //public float DeferGenerate { get => deferGenerate; set => deferGenerate = value; }
@@ -87,16 +91,21 @@ namespace StructuralFieldsPlusTesting {
 
         public void register(CompFieldGenerator generator) {
             this.genPerTick += generator.GenPerTick;
+            this.generators.Add(generator);
         }
 
         public void register(List<CompFieldGenerator> generators) {
             foreach (CompFieldGenerator i in generators) {
                 this.genPerTick += i.GenPerTick;
             }
+            this.generators.AddRange(generators);
         }
 
         public void deregister(CompFieldGenerator generator) {
+            flushDamageGeneration();
             this.genPerTick -= generator.GenPerTick;
+            generator.IsGenerating = false;
+            this.generators.Remove(generator);
         }
 
         #endregion
@@ -112,6 +121,9 @@ namespace StructuralFieldsPlusTesting {
             }
         }
 
+        public void adjustGeneratorOutput(float delta) {
+            genPerTick += delta;
+        }
         
 
         public void tick() {
@@ -120,6 +132,8 @@ namespace StructuralFieldsPlusTesting {
             //do tickRare every 30 ticks == 0.5 seconds
             if(ctr == 30) {
                 flushDamageGeneration();
+            } else if (currentField + deferGenerate - deferDamage > maxField) {
+                deferGenerate = maxField - currentField + deferDamage;
             }
         }
 

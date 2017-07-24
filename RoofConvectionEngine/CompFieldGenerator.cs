@@ -10,8 +10,17 @@ namespace StructuralFieldsPlusTesting {
     class CompFieldGenerator : ThingComp {
         private IntVec3 position;
         private FieldMap fieldMap;
+        private bool isGenerating = false;
+        public float GenPerTick {
+            get => isGenerating ? 
+                ((CompProperties_FieldGenerator)props).loadedWattage / ((CompProperties_FieldGenerator)props).wattToFieldDivisor : 
+                0f ;
+        }
         
-        public float GenPerTick { get => ((CompProperties_FieldGenerator)props).loadedWattage / ((CompProperties_FieldGenerator)props).wattToFieldPerTick; }
+
+        public void changeOutput(float delta) {
+            fieldMap.fieldNets[NetworkID].adjustGeneratorOutput(delta);
+        }
 
         public int NetworkID {
             get => fieldMap.ConduitArray[position.x, position.z];
@@ -24,6 +33,8 @@ namespace StructuralFieldsPlusTesting {
                 return (CompProperties_FieldGenerator)this.props;
             }
         }
+
+        public bool IsGenerating { get => isGenerating; set => isGenerating = value; }
 
         public override void PostSpawnSetup(bool respawningAfterLoad) {
             base.PostSpawnSetup(respawningAfterLoad);

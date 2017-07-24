@@ -8,20 +8,16 @@ using Verse;
 
 namespace StructuralFieldsPlusTesting{
     class Building_ShieldedTurret : Building_TurretGun {
-        /*private float currentShields = 0;
-        private float maxShields = 150;
-        private float regenPerSecond = 1.2f;*/
-
         public CompFieldConduit compFieldConduit = new CompFieldConduit();
         public CompFieldCapacitor compFieldCapacitor = new CompFieldCapacitor();
         public CompFieldGenerator compFieldGenerator = new CompFieldGenerator();
+        //private bool isGenerating = false;
+        //private float origFunctionPower;
 
-        public int NetworkID { get => compFieldConduit.NetworkID;  }
+        public int NetworkID { get => base.Map.GetComponent<FieldMap>().ConduitArray[Position.x, Position.z]; }
         public FieldNet ConnectedFieldNet { get => base.Map.GetComponent<FieldMap>().fieldNets[NetworkID]; }
-        //public float AvailableField { get => ConnectedFieldNet.CurrentField - ConnectedFieldNet.DeferDamage; }
 
-        
-
+        //redirect damage to field
         public override void PreApplyDamage(DamageInfo dInfo, out bool absorbed) {
             base.PreApplyDamage(dInfo, out absorbed);
             if (absorbed) {
@@ -30,9 +26,7 @@ namespace StructuralFieldsPlusTesting{
             ConnectedFieldNet.preApplyDamage(dInfo, out absorbed);
             return;
         }
-
         
-
         public override void ExposeData() {
             base.ExposeData();
             this.compFieldConduit = base.GetComp<CompFieldConduit>();
@@ -45,6 +39,7 @@ namespace StructuralFieldsPlusTesting{
             this.compFieldConduit = base.GetComp<CompFieldConduit>();
             this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
             this.compFieldGenerator = base.GetComp<CompFieldGenerator>();
+            //origFunctionPower = ((CompProperties_Power)this.powerComp.props).basePowerConsumption;
         }
 
         public override string GetInspectString() {
@@ -56,14 +51,29 @@ namespace StructuralFieldsPlusTesting{
                 stringBuilder.Append(baseString);
                 stringBuilder.AppendLine();
             }
-            stringBuilder.Append("Field: ");
-            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.AvailableField));
+            stringBuilder.Append("GenPerTick: ");
+            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.GenPerTick));
+            stringBuilder.Append("\nLocal: ");
+            stringBuilder.Append(string.Format("{0:N8}", compFieldCapacitor.CurrentField));
             // return the complete string
             return stringBuilder.ToString().TrimEndNewlines();
         }
 
         public override void Tick() {
             base.Tick();
+            if(!compFieldGenerator.IsGenerating && powerComp.PowerOn && ConnectedFieldNet.UnusedStorage >= 1) {
+                //IsGnerating has to be updated to update GenPerTick, before adjustingGeneratorOutput from connectedFieldNet
+                compFieldGenerator.IsGenerating = true;
+                ConnectedFieldNet.adjustGeneratorOutput(compFieldGenerator.GenPerTick);
+                base.powerComp.PowerOutput = -((CompProperties_Power)this.powerComp.props).basePowerConsumption -
+                    ((CompProperties_FieldGenerator)this.compFieldGenerator.props).loadedWattage;
+            } else if (compFieldGenerator.IsGenerating && (!powerComp.PowerOn || ConnectedFieldNet.UnusedStorage < 1)) {
+                //has to be applied before shutting down generator
+                ConnectedFieldNet.adjustGeneratorOutput(-compFieldGenerator.GenPerTick);
+                compFieldGenerator.IsGenerating = false;
+                base.powerComp.PowerOutput = -((CompProperties_Power)this.powerComp.props).basePowerConsumption -
+                    ((CompProperties_FieldGenerator)this.compFieldGenerator.props).standbyWattage;
+            }
             /*currentShields += regenPerSecond / 60;
             if(currentShields > maxShields) {
                 currentShields = maxShields;

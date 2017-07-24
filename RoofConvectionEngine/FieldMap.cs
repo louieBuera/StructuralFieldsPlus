@@ -270,8 +270,10 @@ namespace StructuralFieldsPlusTesting {
             List<IntVec2> adjacentCells = checkAdjacentCellsMatch(x, z, index);
 
             //handles case one adjacent conduit, needed for all cases
-            ConduitArray[x, z] = 0;
+            //ConduitArray[x, z] = 0;
             fieldNets[index].deregister(conduit);
+            fieldNets[index].deregister(conduit.parent.GetComp<CompFieldCapacitor>());
+            fieldNets[index].deregister(conduit.parent.GetComp<CompFieldGenerator>());
 
             //case single element of FieldNet, remove FieldNet
             if (adjacentCells.Count == 0) {
@@ -282,9 +284,14 @@ namespace StructuralFieldsPlusTesting {
                 //rebuilt net instead
                 List<CompFieldConduit> conduits = fieldNets[index].Conduits;
                 List<CompFieldCapacitor> capacitors = fieldNets[index].Capacitors;
-                conduits.Remove(conduit);
+                List<CompFieldGenerator> generators = fieldNets[index].Generators;
+                //List<CompFieldCapacitor> capacitors = fieldNets[index].Capacitors;
+                //conduits.Remove(conduit);
                 foreach (CompFieldConduit i in conduits) {
                     i.NetworkID = 0;
+                }
+                foreach (CompFieldGenerator i in generators) {
+                    i.IsGenerating = false;
                 }
                 usedIndices.Remove(index);
                 fieldNets.Remove(index);
@@ -293,9 +300,10 @@ namespace StructuralFieldsPlusTesting {
                 }
                 //relies on conduit of parent to be already in place
                 foreach (CompFieldCapacitor i in capacitors) {
-                    if (!i.Position.Equals(conduit.position)) {
-                        register(i);
-                    }
+                    register(i);
+                }
+                foreach (CompFieldGenerator i in generators) {
+                    register(i);
                 }
             }
         }
