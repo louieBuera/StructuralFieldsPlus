@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Building_FieldConduit.cs" />
+    <Compile Include="Building_ReinforcedWall.cs" />
     <Compile Include="Building_RoofConvectionEngine.cs" />
     <Compile Include="Building_ShieldedTurret.cs" />
     <Compile Include="Building_VerticalCooler.cs" />
