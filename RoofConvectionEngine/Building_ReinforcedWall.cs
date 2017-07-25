@@ -38,5 +38,19 @@ namespace StructuralFieldsPlusTesting {
             }
             return;
         }
+
+        public override string GetInspectString() {
+            StringBuilder stringBuilder = new StringBuilder();
+            // Add the inspections string from the base
+            string baseString = base.GetInspectString();
+            if (!baseString.NullOrEmpty()) {
+                stringBuilder.Append(baseString);
+                stringBuilder.AppendLine();
+            }
+            stringBuilder.Append("Available Field: ");
+            stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.AvailableField));
+            // return the complete string
+            return stringBuilder.ToString().TrimEndNewlines();
+        }
     }
 }

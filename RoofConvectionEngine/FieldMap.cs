@@ -218,6 +218,7 @@ namespace StructuralFieldsPlusTesting {
         }
         
         //handles removal of empty FieldNets
+        //only gets called when parent Building is despawned
         public void deregister(CompFieldConduit conduit) {
             int x = conduit.parent.Position.x;
             int z = conduit.parent.Position.z;
@@ -234,8 +235,14 @@ namespace StructuralFieldsPlusTesting {
 
             //handles case one adjacent conduit, needed for all cases
             fieldNets[index].deregister(conduit);
-            fieldNets[index].deregister(conduit.parent.GetComp<CompFieldCapacitor>());
-            fieldNets[index].deregister(conduit.parent.GetComp<CompFieldGenerator>());
+            var property = conduit.parent.GetType().GetProperty("compFieldCapacitor");
+            if(property != null) {
+                fieldNets[index].deregister(conduit.parent.GetComp<CompFieldCapacitor>());
+            }
+            property = conduit.parent.GetType().GetProperty("compFieldGenerator");
+            if (property != null) {
+                fieldNets[index].deregister(conduit.parent.GetComp<CompFieldGenerator>());
+            }
 
             //case single element of FieldNet, remove FieldNet
             if (adjacentCells.Count == 0) {
@@ -322,7 +329,7 @@ namespace StructuralFieldsPlusTesting {
             try {
                 fieldNets[capacitor.NetworkID].deregister(capacitor);
             } catch (KeyNotFoundException e) {
-                Messages.Message("FieldNet destroyed", MessageSound.Standard);
+                //Messages.Message("FieldNet destroyed", MessageSound.Standard);
             }
         }
 
@@ -334,7 +341,7 @@ namespace StructuralFieldsPlusTesting {
             try {
                 fieldNets[generator.NetworkID].deregister(generator);
             } catch (KeyNotFoundException e) {
-                Messages.Message("FieldNet destroyed", MessageSound.Standard);
+                //Messages.Message("FieldNet destroyed", MessageSound.Standard);
             }
         }
     }
