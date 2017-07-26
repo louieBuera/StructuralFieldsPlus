@@ -14,7 +14,7 @@ namespace StructuralFieldsPlusTesting {
         float deferGenerate = 0;
         float genPerTick = 0;
         float currentField = 0;
-        float maxField = 0;
+        public float maxField = 0;
         int ctr = 0;
 
 
@@ -177,6 +177,12 @@ namespace StructuralFieldsPlusTesting {
             genPerTick = 0;
             foreach(CompFieldGenerator i in generators) {
                 genPerTick += i.GenPerTick;
+            }
+            currentField = 0;
+            maxField = 0;
+            foreach(CompFieldCapacitor i in capacitors) {
+                currentField += i.CurrentField;
+                maxField += i.StoredFieldMax;
             }
         }
 

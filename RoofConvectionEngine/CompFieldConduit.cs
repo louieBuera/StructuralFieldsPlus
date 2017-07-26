@@ -22,8 +22,8 @@ namespace StructuralFieldsPlusTesting {
                 return;
             }
             int height, width, x, z, top, bottom, left, right;
-            height = parent.RotatedSize.x;
-            width = parent.RotatedSize.z;
+            height = parent.RotatedSize.z;
+            width = parent.RotatedSize.x;
             x = parent.Position.x;
             z = parent.Position.z;
             top = z + height / 2;
@@ -46,7 +46,7 @@ namespace StructuralFieldsPlusTesting {
             }
             for (int i = left; i <= right; i++) {
                 for(int j = bottom; j <= top; j++) {
-                    if(i != x && j != z) {
+                    if (i != x || j != z) {
                         fieldMap.ConduitArray[i, j] = NetworkID;
                     }
                 }

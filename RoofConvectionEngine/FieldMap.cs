@@ -312,9 +312,11 @@ namespace StructuralFieldsPlusTesting {
                     //replaceNonZeroIndices(index, adjacentNets[0], ConduitArray);
                     hold.register(temp.Conduits);
                     hold.register(temp.Capacitors);
+                    hold.register(temp.Generators);
                 }
                 //ConduitArray[x, z] = adjacentNets[0];
                 hold.register(conduit);
+                hold.flushDamageGeneration();
             }
 
         }

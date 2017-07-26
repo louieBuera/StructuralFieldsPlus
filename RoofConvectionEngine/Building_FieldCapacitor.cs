@@ -37,7 +37,8 @@ namespace StructuralFieldsPlusTesting {
 
             return "NetID: " + NetworkID.ToString() +
                 "\nAvailable Field: " + string.Format("{0:N8}", ConnectedFieldNet.AvailableField) +
-                "\nLocal Field: " + string.Format("{0:N8}", compFieldCapacitor.CurrentField);
+                "\nLocal Field: " + string.Format("{0:N8}", compFieldCapacitor.CurrentField) +
+                "\nMax Total Field: " + string.Format("{0:N8}", ConnectedFieldNet.maxField);
             // return the complete string
         }
     }
