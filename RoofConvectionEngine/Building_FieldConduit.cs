@@ -37,8 +37,9 @@ namespace StructuralFieldsPlusTesting {
         }
 
         public override string GetInspectString() {
-            return "NetID: " + compFieldConduit.NetworkID.ToString()
-                + "\nAvailable: " + ConnectedFieldNet.AvailableField.ToString();
+            return base.GetInspectString() + "\nNetID: " + compFieldConduit.NetworkID.ToString()
+                + "\nAvailable: " + ConnectedFieldNet.AvailableField.ToString()
+                + "\nGenPerTick: " + ConnectedFieldNet.GenPerTick;
         }
         #endregion
 

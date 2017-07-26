@@ -44,7 +44,6 @@ namespace StructuralFieldsPlusTesting{
             this.compFieldConduit = base.GetComp<CompFieldConduit>();
             this.compFieldCapacitor = base.GetComp<CompFieldCapacitor>();
             this.compFieldGenerator = base.GetComp<CompFieldGenerator>();
-            //origFunctionPower = ((CompProperties_Power)this.powerComp.props).basePowerConsumption;
         }
 
         public override string GetInspectString() {
@@ -57,6 +56,8 @@ namespace StructuralFieldsPlusTesting{
             }
             stringBuilder.Append("Available Field: ");
             stringBuilder.Append(string.Format("{0:N8}", ConnectedFieldNet.AvailableField));
+            stringBuilder.Append("\nLocal Field: ");
+            stringBuilder.Append(string.Format("{0:N8}", compFieldCapacitor.CurrentField));
             // return the complete string
             return stringBuilder.ToString().TrimEndNewlines();
         }

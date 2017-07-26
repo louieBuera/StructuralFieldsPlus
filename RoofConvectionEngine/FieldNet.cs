@@ -17,6 +17,7 @@ namespace StructuralFieldsPlusTesting {
         float maxField = 0;
         int ctr = 0;
 
+
         private List<CompFieldConduit> conduits;
         private List<CompFieldCapacitor> capacitors = new List<CompFieldCapacitor>();
         private List<CompFieldGenerator> generators = new List<CompFieldGenerator>();
@@ -129,13 +130,19 @@ namespace StructuralFieldsPlusTesting {
         
 
         public void tick() {
+            //check if full and undamaged
+            if(!UnityEngine.Mathf.Approximately(currentField, maxField) || !UnityEngine.Mathf.Approximately(deferDamage, 0)) {
+                deferGenerate += genPerTick;
+                //do tickRare every 30 ticks == 0.5 seconds
+                if (currentField + deferGenerate - deferDamage > maxField) {
+                    flushDamageGeneration();
+                    //deferGenerate = maxField - currentField + deferDamage;
+                    ctr = 0;
+                }
+            }
             ctr++;
-            deferGenerate += genPerTick;
-            //do tickRare every 30 ticks == 0.5 seconds
-            if(ctr == 30) {
+            if (ctr == 30) {
                 flushDamageGeneration();
-            } else if (currentField + deferGenerate - deferDamage > maxField) {
-                deferGenerate = maxField - currentField + deferDamage;
             }
         }
 
@@ -166,6 +173,11 @@ namespace StructuralFieldsPlusTesting {
             deferDamage = 0;
             deferGenerate = 0f;
             ctr = 0;
+            //refresh generation
+            genPerTick = 0;
+            foreach(CompFieldGenerator i in generators) {
+                genPerTick += i.GenPerTick;
+            }
         }
 
 

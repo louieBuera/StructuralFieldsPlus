@@ -47,6 +47,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Building_FieldCapacitor.cs" />
     <Compile Include="Building_FieldConduit.cs" />
     <Compile Include="Building_ReinforcedWall.cs" />
     <Compile Include="Building_RoofConvectionEngine.cs" />
