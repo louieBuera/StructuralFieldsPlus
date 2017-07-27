@@ -28,7 +28,6 @@ namespace StructuralFieldsPlusTesting{
             if (((CompPowerTrader)PowerComp).PowerOn) {
                 ConnectedFieldNet.preApplyDamage(dInfo, out absorbed);
             }
-            //ConnectedFieldNet.preApplyDamage(dInfo, out absorbed);
             return;
         }
         

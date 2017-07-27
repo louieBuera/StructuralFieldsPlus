@@ -67,6 +67,9 @@ namespace StructuralFieldsPlusTesting {
 
         public void deregister(CompFieldConduit conduit) {
             conduit.NetworkID = 0;
+            if(!conduit.parent.RotatedSize.Equals(new IntVec2(1, 1))) {
+                conduit.cleanupNetworkID();
+            }
             this.conduits.Remove(conduit);
         }
 

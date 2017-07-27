@@ -50,6 +50,7 @@
     <Compile Include="Building_FieldCapacitor.cs" />
     <Compile Include="Building_FieldConduit.cs" />
     <Compile Include="Building_FieldGenerator.cs" />
+    <Compile Include="Building_ReinforcedDoor.cs" />
     <Compile Include="Building_ReinforcedWall.cs" />
     <Compile Include="Building_RoofConvectionEngine.cs" />
     <Compile Include="Building_ShieldedTurret.cs" />

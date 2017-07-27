@@ -53,6 +53,42 @@ namespace StructuralFieldsPlusTesting {
             }
         }
 
+        public void cleanupNetworkID() {
+            if (parent.RotatedSize.Equals(new IntVec2(1, 1))) {
+                return;
+            }
+            int height, width, x, z, top, bottom, left, right;
+            height = parent.RotatedSize.z;
+            width = parent.RotatedSize.x;
+            x = parent.Position.x;
+            z = parent.Position.z;
+            top = z + height / 2;
+            //if dimension is even, Position lakes lower-left cell from exact center
+            //just round down to compensate
+            bottom = z - (height - 1) / 2;
+            left = x - (width - 1) / 2;
+            right = x + width / 2;
+            if (top > fieldMap.z_size) {
+                top = fieldMap.z_size - 1;
+            }
+            if (bottom < 0) {
+                bottom = 0;
+            }
+            if (right > fieldMap.x_size) {
+                right = fieldMap.x_size - 1;
+            }
+            if (left < 0) {
+                left = 0;
+            }
+            for (int i = left; i <= right; i++) {
+                for (int j = bottom; j <= top; j++) {
+                    if (i != x || j != z) {
+                        fieldMap.ConduitArray[i, j] = 0;
+                    }
+                }
+            }
+        }
+
         public override void PostSpawnSetup(bool respawningAfterLoad) {
             base.PostSpawnSetup(respawningAfterLoad);
             position = parent.Position;

@@ -256,6 +256,9 @@ namespace StructuralFieldsPlusTesting {
                 List<CompFieldGenerator> generators = fieldNets[index].Generators;
                 foreach (CompFieldConduit i in conduits) {
                     i.NetworkID = 0;
+                    if(i.parent.RotatedSize.x != 1 || i.parent.RotatedSize.z != 1) {
+                        i.cleanupNetworkID();
+                    }
                 }
                 foreach (CompFieldGenerator i in generators) {
                     i.IsGenerating = false;
@@ -293,19 +296,26 @@ namespace StructuralFieldsPlusTesting {
                 //ConduitArray[x, z] = index;
                 usedIndices.Add(index);
                 fieldNets.Add(index, new FieldNet(index, new List<CompFieldConduit>()));
+                Log.Message("fieldNets.Count == 0 || adjacentNets.NullOrEmpty()");
                 fieldNets[index].register(conduit);
                 return;
             } else if (adjacentNets.Count == 1) {
                 index = adjacentNets.First();
                 //ConduitArray[x, z] = index;
+                Log.Message("adjacentNets.Count == 1");
+                Log.Message(index.ToString());
+                Log.Message(conduit.parent.Label);
+                Log.Message(conduit.parent.Position.ToString());
                 fieldNets[index].register(conduit);
             } else {
+                Log.Message("else");
                 FieldNet hold = fieldNets[adjacentNets[0]];
                 FieldNet temp;
                 for(int i = 1; i < adjacentNets.Count; i++) {
                     index = adjacentNets[i];
-
+                    Log.Message("assign :" + index.ToString());
                     temp = fieldNets[index];
+                    Log.Message("remove: :" + index.ToString());
                     fieldNets.Remove(index);
                     usedIndices.Remove(index);
 
